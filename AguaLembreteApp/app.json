@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "scheme": "agualembreteapp",
+    "name": "AguaLembreteApp",
+    "slug": "AguaLembreteApp",
+    "version": "1.0.0",
+    "extra": {
+      "equipe": [
+        "Desenvolvedora: Roberta",
+        "Designer: Matheus",
+        "Suporte: Guilherme"
+      ]
+    },
+    "pluggins": [
+      "expo-router",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#ffffff",
+          "defaultChannel": "default",
+          "enableBackgroundRemoteNotificartions": false
+        }
+      ]
+    ],
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.jpg",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.jpg",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
