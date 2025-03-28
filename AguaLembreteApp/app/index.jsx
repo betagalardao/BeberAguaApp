@@ -14,7 +14,7 @@ const META_DIARIA_KEY = "metaDiariaAgua"
 export default function HomeScreen() {
     const { theme } = useTheme();
     const [copos, setCopos] = useState(0);
-    const [dailyGoal, setDailyGoal] = useState(0); //estado para a meta 
+    const [metaDiaria, setMetaDiaria] = useState(0); //estado para a meta 
   
     useEffect(() => {
       const initialize = async () => {
@@ -53,7 +53,8 @@ export default function HomeScreen() {
     const carregarMetaDiaria = async () => {
       try {
           const savedGoal = await AsyncStorage.getItem(META_DIARIA_KEY);
-          setDailyGoal(savedGoal ? parseInt(savedGoal) : 0);
+          console.log("Meta diária salva:", savedGoal); 
+          setMetaDiaria (savedGoal ? parseInt(savedGoal, 10) : 0);
       } catch (e) {
           console.error("Erro ao carregar meta diária:", e);
       }
@@ -65,7 +66,7 @@ export default function HomeScreen() {
                 Lembrete de Água
             </Text>
             <Text style={[styles.goalText, { color: theme.primaryDark }]}>
-                Meta Diária: {copos} / {dailyGoal} copos
+                Meta Diária: {copos} / {metaDiaria} copos
             </Text>
             <AguaContador copos={copos} setCopos={setCopos} />
         </View>
