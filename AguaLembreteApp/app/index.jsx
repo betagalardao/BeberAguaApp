@@ -8,17 +8,20 @@ import { setupNotifications, updateNotifications } from "../utils/notifications"
 import { useTheme } from "../utils/ThemeContext"
 
 const HISTORICO_AGUA = "waterHistory"; //mesma chave usada no componente AguaContador
+const META_DIARIA_KEY = "metaDiariaAgua"
 
 //lógica Principal
 export default function HomeScreen() {
     const { theme } = useTheme();
     const [copos, setCopos] = useState(0);
+    const [dailyGoal, setDailyGoal] = useState(0); //estado para a meta 
   
     useEffect(() => {
       const initialize = async () => {
         await setupNotifications();
         await carregar();
         await updateNotifications();
+        await carregarMetaDiaria();
       };
       initialize(); //configura notificações e carrega o histórico ao iniciar
     }, []);
@@ -27,6 +30,7 @@ export default function HomeScreen() {
       useCallback(() => {
         const recarregarAoVoltar = async () => { 
           await carregar(); //carrega o histórico de consumo de água e atualiza o contador de copos
+          await carregarMetaDiaria();
         };
         recarregarAoVoltar(); //recarrega os dados ao voltar para a tela
       }, [])
@@ -44,14 +48,27 @@ export default function HomeScreen() {
         console.error("Erro ao carregar contagem do dia:", e);
       }
     };
-  
+
+    //carregar a meta diaria direto do AsyncStorage
+    const carregarMetaDiaria = async () => {
+      try {
+          const savedGoal = await AsyncStorage.getItem(META_DIARIA_KEY);
+          setDailyGoal(savedGoal ? parseInt(savedGoal) : 0);
+      } catch (e) {
+          console.error("Erro ao carregar meta diária:", e);
+      }
+  };
+
     return (
       <View style={[styles.container, { backgroundColor: theme.background }]}>
-        <Text style={[styles.title, { color: theme.primaryDark }]}>
-          Lembrete de Água
-        </Text>
-        <AguaContador copos={copos} setCopos={setCopos} />
-      </View>
+            <Text style={[styles.title, { color: theme.primaryDark }]}>
+                Lembrete de Água
+            </Text>
+            <Text style={[styles.goalText, { color: theme.primaryDark }]}>
+                Meta Diária: {copos} / {dailyGoal} copos
+            </Text>
+            <AguaContador copos={copos} setCopos={setCopos} />
+        </View>
     );
   }
 

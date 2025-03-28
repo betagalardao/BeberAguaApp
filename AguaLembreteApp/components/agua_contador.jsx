@@ -5,12 +5,23 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTheme } from "../utils/ThemeContext";
 
 const HISTORICO_AGUA = "waterHistory";
+const META_DIARIA_KEY = "metaDiariaAgua"; // chave para a meta diária
 
 //lógica e interface
 //copos e setCopos controla o contador de copos de água
 export default function AguaContador({ copos, setCopos }) {
     const { theme } = useTheme();
-  
+    const [dailyGoal, setDailyGoal] = useState(0);
+
+    //carregar a meta diária ao montar o componente
+    useEffect(() => {
+      const loadGoal = async () => {
+          const savedGoal = await AsyncStorage.getItem(META_DIARIA_KEY);
+          setDailyGoal(savedGoal ? parseInt(savedGoal) : 0);
+      };
+      loadGoal();
+  }, []);
+
     const adicionar = async () => {
       const dtAtual = new Date().toLocaleDateString("pt-BR");
       setCopos(copos + 1);
@@ -34,7 +45,7 @@ export default function AguaContador({ copos, setCopos }) {
       <View style={[styles.counterCard, { backgroundColor: theme.cardBackground }]}>
         <View style={styles.cardContent}>
           <Text style={[styles.counterText, { color: theme.primaryDark }]}>
-            Copos Hoje
+            Copos Hoje: {copos} / {dailyGoal}
           </Text>
           <Button title="Bebi um copo!" onPress={adicionar} color={theme.primary} />
         </View>

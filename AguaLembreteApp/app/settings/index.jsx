@@ -1,6 +1,6 @@
 //tela de configurações
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View, Text, Switch, ActivityIndicator } from "react-native";
+import { StyleSheet, View, Text, Switch, ActivityIndicator, TextInput, Button } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { updateNotifications } from "../../utils/notifications";
 import Slider from "@react-native-community/slider";
@@ -10,7 +10,7 @@ const SETTINGS_PATH = "beberagua:notificationSettings";
 const INTERVAL_MIN = 0.01;
 const INTERVAL_MAX = 4;
 const INTERVAL_STEP = 0.01;
-const META = 8; //meta padrão de 8 copos
+const META_DIARIA_KEY = "metaDiariaAgua"; // chave para a meta diária
 
 //lógica principal
 export default function SettingsScreen() {
@@ -19,7 +19,7 @@ export default function SettingsScreen() {
     const [isLoading, setIsLoading] = useState(true);
     const { theme, setTheme } = useTheme();
     const [isDarkMode, setIsDarkMode] = useState(theme === themes.dark);
-    const [metaDiaria, setMetaDiaria] = useState(META); //estado para inicializar a meta
+    const [metaInput, setMetaInput] = useState(""); // estado para o input da meta
     
     const toggleTheme = (value) => { //alterna os temas
       setIsDarkMode(value);
@@ -29,143 +29,108 @@ export default function SettingsScreen() {
     useEffect(() => {
       loadSettings(); //carrega as configurações salvas no AsyncStorage
     }, []);
-  
-    useEffect(() => {
-      if (!isLoading) {
-        saveSettings(); //salva as config. no AsyncStorage e atualiza as notificações
-      }
-    }, [isDarkMode, notificationsEnabled, interval, metaDiaria]);
-  
+
     const loadSettings = async () => {
       try {
-        const savedSettings = await AsyncStorage.getItem(SETTINGS_PATH);
-        if (savedSettings) {
-          const { enabled, interval: savedInterval, theme: savedTheme, meta: savedMeta } = JSON.parse(savedSettings);
-          setNotificationsEnabled(enabled);
-          setInterval(parseFloat(savedInterval) || 1);
-          setIsDarkMode(savedTheme === "dark");
-          setMetaDiaria(savedMeta || META);
-          if (savedTheme) setTheme(savedTheme);
-        } else {
-          setInterval(1);
-          setMetaDiaria(META); //definir a meta padrão se não tiver
-        }
+          const savedSettings = await AsyncStorage.getItem(SETTINGS_PATH);
+          if (savedSettings) {
+              const { enabled, interval: savedInterval, theme: savedTheme } = JSON.parse(savedSettings);
+              setNotificationsEnabled(enabled);
+              setInterval(parseFloat(savedInterval) || 1);
+              setIsDarkMode(savedTheme === "dark");
+          } else {
+              setInterval(1);
+          }
       } catch (e) {
-        console.error("Erro ao carregar configurações:", e);
-        setInterval(1);
-        setMetaDiaria(META); //define a meta padrão em caso de erro
+          console.error("Erro ao carregar configurações:", e);
       } finally {
-        setIsLoading(false);
+          setIsLoading(false);
       }
-    };
-  
-    const saveSettings = async () => {
-      try {
-        const settings = {
-          enabled: notificationsEnabled,
-          interval: interval,
-          theme: isDarkMode ? "dark" : "light",
-          meta: metaDiaria, //salvar a meta de copos
-        };
-        await AsyncStorage.setItem(SETTINGS_PATH, JSON.stringify(settings));
-        await updateNotifications();
-      } catch (e) {
-        console.error("Erro ao salvar configurações:", e);
+  };
+    const saveMeta = async () => {
+      if (metaInput) {
+        await AsyncStorage.setItem(META_DIARIA_KEY, metaInput);
+          alert("Meta diária salva!");
+      } else {
+          alert("Por favor, insira uma meta válida.");
       }
-    };
-  
-    //indicador de carregamento
-    if (isLoading) {
-      return (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.primary} />
-        </View>
-      );
-    }
+  };
 
-    //interface
+if (isLoading) {
     return (
-        <View style={[styles.container, { backgroundColor: theme.background }]}>
-          <View style={[styles.card, { backgroundColor: theme.cardBackground }]}>
-            <View style={styles.setting}>
-              <Text style={[styles.label, { color: theme.secondaryText }]}>
-                Modo Escuro
-              </Text>
-              <Switch
-                value={isDarkMode}
-                onValueChange={toggleTheme}
-                trackColor={{ false: "#ccc", true: theme.primary }}
-                thumbColor={isDarkMode ? theme.primaryDark : "#f4f3f4"}
-              />
-            </View>
-            <View style={styles.setting}>
-              <Text style={[styles.label, { color: theme.secondaryText }]}>
-                Notificações
-              </Text>
-              <Switch
-                value={notificationsEnabled}
-                onValueChange={setNotificationsEnabled}
-                trackColor={{ false: "#ccc", true: theme.primary }}
-                thumbColor={notificationsEnabled ? theme.primaryDark : "#f4f3f4"}
-              />
-            </View>
-            <View style={styles.sliderContainer}>
-              <Text style={[styles.label, { color: theme.secondaryText }]}>
-                Intervalo: {interval?.toFixed(2)} hora(s)
-              </Text>
-              <Slider
-                style={styles.slider}
-                minimumValue={INTERVAL_MIN}
-                maximumValue={INTERVAL_MAX}
-                step={INTERVAL_STEP}
-                value={interval}
-                onValueChange={setInterval}
-                minimumTrackTintColor={theme.primary}
-                maximumTrackTintColor={theme.secondaryText}
-                thumbTintColor={theme.primaryDark}
-              />
-            </View>
-          </View>
+        <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={theme.primary} />
         </View>
-      );
-    }
+    );
+}
+
+return (
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+        <View style={[styles.card, { backgroundColor: theme.cardBackground }]}>
+            <View style={styles.setting}>
+                <Text style={[styles.label, { color: theme.secondaryText }]}>
+                    Modo Escuro
+                </Text>
+                <Switch
+                    value={isDarkMode}
+                    onValueChange={toggleTheme}
+                    trackColor={{ false: "#ccc", true: theme.primary }}
+                    thumbColor={isDarkMode ? theme.primaryDark : "#f4f3f4"}
+                />
+            </View>
+            <View style={styles.setting}>
+                <Text style={[styles.label, { color: theme.secondaryText }]}>
+                    Meta Diária de Copos
+                </Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Defina sua meta diária"
+                    keyboardType="numeric"
+                    value={metaInput}
+                    onChangeText={setMetaInput}
+                />
+                <Button title="Salvar Meta" onPress={saveMeta} />
+            </View>
+        </View>
+    </View>
+  );
+}
 
 //estilos
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      padding: 15,
-    },
-    card: {
-      borderRadius: 15,
-      padding: 20,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 8,
-      elevation: 5,
-    },
-    setting: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginVertical: 15,
-    },
-    label: {
-      fontSize: 18,
-      fontWeight: "500",
-    },
-    sliderContainer: {
-      marginVertical: 15,
-    },
-    slider: {
-      width: "100%",
-      height: 40,
-    },
-    loadingContainer: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-    },
-  });
-    
+container: {
+    flex: 1,
+    padding: 15,
+},
+card: {
+    borderRadius: 15,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+},
+setting: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginVertical: 15,
+},
+label: {
+    fontSize: 18,
+    fontWeight: "500",
+},
+input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 10,
+    marginBottom: 10,
+    flex: 1,
+},
+loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+},
+});
