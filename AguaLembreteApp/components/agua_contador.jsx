@@ -5,13 +5,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTheme } from "../utils/ThemeContext";
 
 const HISTORICO_AGUA = "waterHistory";
-const META_DIARIA_KEY = "metaDiariaAgua"; // chave para a meta diária
 
 //lógica e interface
 //copos e setCopos controla o contador de copos de água
-export default function AguaContador({ copos, setCopos }) {
+export default function AguaContador({ copos, setCopos, metaDiaria }) {
     const { theme } = useTheme();
-    const [metaDiaria, setMetaDiaria] = useState(0);
     
     const adicionar = async () => {
       const dtAtual = new Date().toLocaleDateString("pt-BR");

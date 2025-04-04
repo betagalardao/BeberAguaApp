@@ -68,7 +68,7 @@ export default function HomeScreen() {
             <Text style={[styles.goalText, { color: theme.primaryDark }]}>
                 Meta Diária: {copos} / {metaDiaria} copos
             </Text>
-            <AguaContador copos={copos} setCopos={setCopos} />
+            <AguaContador copos={copos} setCopos={setCopos} metaDiaria={metaDiaria} />
         </View>
     );
   }
